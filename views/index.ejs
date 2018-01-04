@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Survey Form</title>
+    <link href="/favicon.ico" type="image/x-icon" rel="icon" />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type ="text/javascript">
+         $(document).ready(function (){
+            var socket  = io.connect();
+
+            $( 'form').submit(function(){
+              var inputs = $('form :input');
+              var values = {};
+              inputs.each(function() {
+                  values[this.name] = $(this).val();
+              });
+              // console.log(values)
+
+              socket.emit( "form", {values: values});
+              event.preventDefault();
+            });
+
+              socket.on( 'update_message', function (data){
+                // console.log(data.submited)
+                $( "div.result" ).append('<h4>You emitted the following information to the server:</h4>')
+                $.each(data.submited, function(key, value){
+                  if(key == ""){return true; }
+                  $( "div.result" ).append('<p>'+ key + ':' + value + '</p>')
+                })
+              });
+
+              socket.on( 'random_number', function (data){
+                // console.log(data.random)
+                $( "div.result" ).append('<h4>Your lucky number emitted by the server is:</h4>')
+                $( "div.result" ).append('<p>' + data.random + '</p>')
+              });
+        })
+    </script>
+  </head>
+  <body>
+    <div class="result"></div>
+    <h1>Survey Form</h1>
+    <form class="form" action="/results" method="post">
+      Your name:
+      <input type="text" name="name">
+      Dojo Location:
+      <select name="location">
+        <option value="mountaine view">Mountaine View</option>
+        <option value="los angeles">Los Angeles</option>
+        <option value="new york">New York</option>
+      </select>
+      Favorite Language:
+      <select name="language">
+        <option value="javascript">Javascript</option>
+        <option value="python">Python</option>
+        <option value="ruby">Ruby</option>
+      </select>
+      Comment (optional):
+      <input type="textarea" name="comment">
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>
